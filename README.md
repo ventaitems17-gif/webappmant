@@ -37,7 +37,14 @@ Haz doble clic en `ABRIR-APP.bat`. Enciende un servidor local en `http://localho
 
 ## Abrir la página en limpio
 
-Agrega `?limpio` al final de la dirección para abrir la app sin los datasets de ejemplo y sin ningún dataset activo, lista para cargar tu archivo:
+El botón **Limpiar dataset**, en la esquina inferior izquierda, deja la interfaz vacía para que otra persona cargue su archivo. Pide confirmación y luego:
+
+- quita todos los datasets, incluidos los de ejemplo;
+- borra de este navegador los archivos cargados (los originales del equipo no se tocan);
+- quita los filtros y los datos de autor guardados para el PDF;
+- mantiene las metas y los pesos configurados.
+
+También puedes agregar `?limpio` al final de la dirección para abrir la app sin los datasets de ejemplo y sin ningún dataset activo, lista para cargar tu archivo:
 
 - En línea: `https://ventaitems17-gif.github.io/webappmant/?limpio`
 - En local: `http://localhost:5610/?limpio`

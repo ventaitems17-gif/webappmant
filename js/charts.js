@@ -1,8 +1,8 @@
 // Constructores de opciones ECharts. Cada función recibe el resultado del
 // análisis (K) y los tokens de tema (T) y devuelve una opción lista para usar,
 // tanto en pantalla como en el informe PDF (T.print = true).
-import { num, pct, compact, clp, monthLabel } from './util.js?v=1.0.8';
-import { TIPOS, DIMENSIONS, KPI_DEFS } from './kpi.js?v=1.0.8';
+import { num, pct, compact, clp, monthLabel } from './util.js?v=1.0.11';
+import { TIPOS, DIMENSIONS, KPI_DEFS } from './kpi.js?v=1.0.11';
 
 // ---------- tokens ----------
 export function themeTokens(mode = 'light', print = false) {

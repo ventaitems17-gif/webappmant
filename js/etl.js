@@ -1,6 +1,6 @@
 // ETL del dataset CMMS: lectura, mapeo de columnas, depuración y
 // diagnóstico de calidad de datos (dimensiones DAMA / ISO 8000).
-import { normKey, median, quantile, monthKey, monthRange, DAY, HOUR } from './util.js?v=1.0.8';
+import { normKey, median, quantile, monthKey, monthRange, DAY, HOUR } from './util.js?v=1.0.11';
 
 // Modelo canónico de datos. "aliases" se comparan normalizados (sin tildes,
 // minúsculas, solo letras y números). El orden de los alias define la preferencia.

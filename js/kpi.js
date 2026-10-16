@@ -2,7 +2,7 @@
 // Referencias: EN 13306:2017 (terminología), EN 15341:2019 (KPI de mantenimiento),
 // SMRP Best Practices (métricas), ISO 14224:2016 (datos de confiabilidad),
 // Knights (2001) diagramas de dispersión logarítmica, Abernethy (2006) Weibull.
-import { HOUR, DAY, sum, mean, median, groupBy, monthRange, monthKey, monthStart, monthEnd, linreg, gamma, num, pct, clp, hours, monthLabel } from './util.js?v=1.0.8';
+import { HOUR, DAY, sum, mean, median, groupBy, monthRange, monthKey, monthStart, monthEnd, linreg, gamma, num, pct, clp, hours, monthLabel } from './util.js?v=1.0.11';
 
 export const TIPOS = ['Preventivo', 'Correctivo', 'Predictivo'];
 

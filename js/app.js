@@ -1,8 +1,8 @@
 // WebAppMant: interfaz, estado y orquestación.
-import * as U from './util.js?v=1.0.8';
-import { FIELDS, parseCSV, readFile, headerRow, autoMap, missingRequired, processDataset, recordsToCSV, templateCSV } from './etl.js?v=1.0.8';
-import { analyze, narrative, DEFAULT_SETTINGS, KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, STATUS, targetText, critText, fmtKpi, weibullStrategy, weibullStrategyShort, RULE_SUMMARY, TIPOS } from './kpi.js?v=1.0.8';
-import * as C from './charts.js?v=1.0.8';
+import * as U from './util.js?v=1.0.11';
+import { FIELDS, parseCSV, readFile, headerRow, autoMap, missingRequired, processDataset, recordsToCSV, templateCSV } from './etl.js?v=1.0.11';
+import { analyze, narrative, DEFAULT_SETTINGS, KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, STATUS, targetText, critText, fmtKpi, weibullStrategy, weibullStrategyShort, RULE_SUMMARY, TIPOS } from './kpi.js?v=1.0.11';
+import * as C from './charts.js?v=1.0.11';
 
 const { num, pct, clp, hours, esc, fmtDate } = U;
 
@@ -24,7 +24,7 @@ const FILTER_DIMS = [
 const EXTRA_DIMS = { modo: 'Modo de falla', equipo: 'Equipo', area: 'Área', causa: 'Causa' };
 const FLAG_NAMES = { 1: 'Fin < inicio', 2: 'Inicio < creación', 4: 'Plan < creación', 8: 'Cerrada sin fin', 16: 'Abierta con fin', 32: 'Detención > lapso', 64: 'Costo ≠ componentes', 128: 'Estado ≠ status', 256: 'Tipo ≠ clase', 512: 'Sin modo de falla', 1024: 'Atípico extremo' };
 
-const CLEAN = new URLSearchParams(location.search).has('limpio');
+let CLEAN = new URLSearchParams(location.search).has('limpio');
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -80,6 +80,7 @@ const IDB = {
   all() { return this.tx('readonly', (st) => st.getAll()).catch(() => []); },
   put(o) { return this.tx('readwrite', (st) => st.put(o)).catch(() => null); },
   del(id) { return this.tx('readwrite', (st) => st.delete(id)).catch(() => null); },
+  clear() { return this.tx('readwrite', (st) => st.clear()).catch(() => null); },
 };
 
 // ---------------- utilidades de interfaz ----------------
@@ -302,6 +303,7 @@ function renderDsList() {
     return `<li class="ds-item ${d.id === state.activeId ? 'active' : ''}"><button class="ds-pick" data-ds="${d.id}" type="button" title="${esc(d.file || '')}"><span class="dot"></span><span><span class="ds-name">${esc(d.name)}</span><span class="ds-meta">${meta}</span></span></button>` +
       (d.source === 'upload' ? `<button class="ds-del" data-del="${d.id}" type="button" aria-label="Quitar ${esc(d.name)}"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>` : '') + '</li>';
   }).join('') || '<li class="muted" style="padding:0 8px;font-size:12.5px;color:var(--muted)">Sin datasets todavía.</li>';
+  $('#btnClean').disabled = !state.datasets.length;
 }
 function renderTitleblock() {
   const ds = active(), K = state.K;
@@ -790,6 +792,7 @@ function bindEvents() {
     if (t.closest('#fClear') || t.closest('#emptyClear')) { state.filters = emptyFilters(); refresh(); return; }
     if (t.closest('#btnUpload') || t.closest('#tbUpload') || t.closest('#emptyUpload')) { $('#fileInput').click(); return; }
     if (t.closest('#tbPdf')) { openPdfDialog(); return; }
+    if (t.closest('#btnClean')) { openCleanDialog(); return; }
     if (t.closest('#btnMenu')) { openRail(); return; }
     if (t.closest('#scrim')) { closeRail(); return; }
     const how = t.closest('.how-btn');
@@ -906,7 +909,7 @@ function openPdfDialog() {
       const list = opts.compare ? await compareList() : [];
       $('#busyText').textContent = 'Dibujando gráficos y tablas…';
       await nextFrame();
-      const { generateReport } = await import('./report.js?v=1.0.8');
+      const { generateReport } = await import('./report.js?v=1.0.11');
       const name = await generateReport({ K: state.K, N: state.N, ds, meta, opts, compare: list, filters: filtersText(), recsN: state.recs.length, references: REFERENCES });
       busy(false);
       toast('Informe descargado: ' + name);
@@ -916,6 +919,37 @@ function openPdfDialog() {
     }
   };
   dlg.showModal();
+}
+
+// ---------------- limpiar la interfaz ----------------
+function setModeLink() {
+  const lm = $('#lnkMode');
+  lm.href = CLEAN ? './' : './?limpio';
+  lm.textContent = CLEAN ? 'Ver con los datasets de ejemplo' : 'Abrir en limpio, sin datos de ejemplo';
+}
+function openCleanDialog() {
+  if (!state.datasets.length) return;
+  const dlg = $('#dlgClean');
+  const n = state.datasets.filter((d) => d.source === 'upload').length;
+  $('#cleanCount').textContent = n ? n + ' ' + U.plural(n, 'archivo', 'archivos') : 'ninguno';
+  dlg.returnValue = '';
+  dlg.onclose = () => { if (dlg.returnValue === 'ok') cleanAll(); };
+  dlg.showModal();
+}
+// Deja la app vacía para otro usuario: sin datasets (ni de ejemplo), sin
+// filtros ni datos de autor del PDF. Las metas configuradas se conservan.
+async function cleanAll() {
+  closePop(); closeRail();
+  await IDB.clear();
+  state.datasets = []; state.activeId = null; state.filters = emptyFilters(); state.cmpCache.clear();
+  state.table = { q: '', page: 0, onlyFlags: false }; state.weibullSel = null; state.paretoMetric = 'n';
+  try { localStorage.removeItem(LS_PDF); } catch (e) { /* sin persistencia */ }
+  CLEAN = true;
+  setModeLink();
+  history.replaceState(null, '', location.pathname + '?limpio' + location.hash);
+  refresh();
+  window.scrollTo({ top: 0 });
+  toast('Interfaz limpia. Carga un archivo para comenzar.');
 }
 
 // ---------------- inicio ----------------
@@ -928,7 +962,7 @@ async function init() {
   if (!window.echarts || !window.Papa) { renderView(); return; }
   $('#view').innerHTML = '<div class="empty"><span class="spinner"></span><h2>Preparando la aplicación</h2></div>';
   // Modo limpio (?limpio): sin datasets de ejemplo ni dataset activo al abrir.
-  if (CLEAN) { const lm = $('#lnkMode'); lm.href = './'; lm.textContent = 'Ver con los datasets de ejemplo'; }
+  setModeLink();
   if (!CLEAN) await loadManifest();
   await restoreUploads();
   renderDsList();

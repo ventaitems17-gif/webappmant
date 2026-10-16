@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=1.0.8">
+  <link rel="stylesheet" href="css/app.css?v=1.0.11">
   <script>
     try { var t = localStorage.getItem('webappmant.theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
@@ -39,6 +39,11 @@
         <a class="rail-link" id="lnkTemplate" href="plantilla/plantilla_dataset_CMMS.csv" download>Descargar plantilla CSV</a>
         <a class="rail-link" id="lnkMode" href="./?limpio">Abrir en limpio, sin datos de ejemplo</a>
       </section>
+      <div class="rail-bottom">
+        <button class="btn btn-clean btn-block" id="btnClean" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5 5.5l.8 10.6A1.5 1.5 0 0 0 7.3 17.5h5.4a1.5 1.5 0 0 0 1.5-1.4l.8-10.6M8.5 9v5M11.5 9v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Limpiar dataset
+        </button>
       <footer class="rail-foot">
         <button class="theme-toggle" id="btnTheme" type="button" aria-label="Cambiar tema claro u oscuro">
           <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3a7 7 0 1 0 7 7 5.5 5.5 0 0 1-7-7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -46,6 +51,7 @@
         </button>
         <span class="ver">Versión 1.0</span>
       </footer>
+      </div>
     </aside>
     <div class="scrim" id="scrim" hidden></div>
 
@@ -83,6 +89,25 @@
     </form>
   </dialog>
 
+  <dialog class="dlg" id="dlgClean" aria-labelledby="dlgCleanTitle">
+    <form method="dialog" class="dlg-body">
+      <header class="dlg-head">
+        <h2 id="dlgCleanTitle">Limpiar dataset</h2>
+        <p class="dlg-sub">La interfaz quedará vacía, lista para que otra persona cargue su archivo.</p>
+      </header>
+      <ul class="refs">
+        <li>Se quitan de la lista todos los datasets, incluidos los de ejemplo.</li>
+        <li>Se borran de este navegador los archivos cargados (<span id="cleanCount">ninguno</span>). Los archivos originales en tu equipo no se modifican.</li>
+        <li>Se quitan los filtros y los datos de autor guardados para el informe PDF.</li>
+        <li>Las metas y los pesos de Metodología y metas se mantienen.</li>
+      </ul>
+      <footer class="dlg-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Cancelar</button>
+        <button class="btn btn-danger" value="ok" type="submit">Limpiar dataset</button>
+      </footer>
+    </form>
+  </dialog>
+
   <dialog class="dlg" id="dlgPdf" aria-labelledby="dlgPdfTitle">
     <form method="dialog" class="dlg-body" id="formPdf">
       <header class="dlg-head">
@@ -116,6 +141,6 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/app.js?v=1.0.8"></script>
+  <script type="module" src="js/app.js?v=1.0.11"></script>
 </body>
 </html>

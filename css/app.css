@@ -66,7 +66,7 @@ p { margin: 0; }
 .app { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); min-height: 100vh; }
 .rail {
   position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;
-  padding: 20px 14px 14px; background: var(--surface); border-right: 1px solid var(--line);
+  padding: 20px 14px 0; background: var(--surface); border-right: 1px solid var(--line);
 }
 .brand { display: flex; gap: 10px; align-items: center; padding: 0 6px; color: var(--accent); }
 .brand-mark { width: 36px; height: 36px; flex: none; }
@@ -99,7 +99,13 @@ p { margin: 0; }
 .ds-item .ds-del { background: none; border: 0; color: var(--muted); padding: 6px; border-radius: var(--r-sm); cursor: pointer; line-height: 0; }
 .ds-item .ds-del:hover { color: var(--crit-ink); background: var(--surface-2); }
 .rail-link { font-size: 12.5px; padding: 0 8px; }
-.rail-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.rail-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding: 12px 0 14px; position: sticky; bottom: 0; background: var(--surface); z-index: 2; }
+.btn.btn-clean { justify-content: center; color: var(--crit-ink); border-color: color-mix(in srgb, var(--crit) 45%, var(--line-2)); }
+.btn.btn-clean:hover { background: color-mix(in srgb, var(--crit) 9%, var(--surface)); }
+.btn.btn-clean[disabled] { color: var(--muted); border-color: var(--line-2); background: transparent; }
+.btn.btn-danger { background: var(--crit); border-color: var(--crit); color: #fff; }
+.btn.btn-danger:hover { background: color-mix(in srgb, var(--crit) 86%, #000); }
+.rail-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .theme-toggle { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 6px 8px; border-radius: var(--r-md); color: var(--ink-2); cursor: pointer; font-size: 13px; }
 .theme-toggle svg { width: 16px; height: 16px; }
 .theme-toggle:hover { background: var(--surface-2); }
