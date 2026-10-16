@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebAppMant – Desempeño de mantenimiento</title>
+  <meta name="description" content="Aplicación web estática para analizar datos CMMS de mantenimiento: calidad de datos, disponibilidad, confiabilidad (Weibull, Jack-knife), gestión del trabajo, costos e informe PDF con el modelo IDM-7.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=1.0.6">
+  <script>
+    try { var t = localStorage.getItem('webappmant.theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="rail" id="rail" aria-label="Navegación">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <rect x="1" y="1" width="38" height="38" rx="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 11 C9 23, 12 26, 16 26 L25 26 C29 26, 31 23, 33 13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="33" cy="13" r="2.4" fill="currentColor"/>
+        </svg>
+        <div>
+          <div class="brand-name">WebAppMant</div>
+          <div class="brand-sub">Desempeño de mantenimiento</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <section class="rail-ds">
+        <h2 class="rail-h">Datasets</h2>
+        <ul class="ds-list" id="dsList"></ul>
+        <button class="btn btn-ghost btn-block" id="btnUpload" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V3m0 0L6 7m4-4 4 4M3 13v2.5A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5V13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Cargar dataset
+        </button>
+        <a class="rail-link" id="lnkTemplate" href="plantilla/plantilla_dataset_CMMS.csv" download>Descargar plantilla CSV</a>
+      </section>
+      <footer class="rail-foot">
+        <button class="theme-toggle" id="btnTheme" type="button" aria-label="Cambiar tema claro u oscuro">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3a7 7 0 1 0 7 7 5.5 5.5 0 0 1-7-7Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <span id="themeLabel">Tema oscuro</span>
+        </button>
+        <span class="ver">Versión 1.0</span>
+      </footer>
+    </aside>
+    <div class="scrim" id="scrim" hidden></div>
+
+    <main class="main" id="main">
+      <header class="titleblock" id="titleblock"></header>
+      <div class="filterbar" id="filterbar" role="toolbar" aria-label="Filtros"></div>
+      <div class="chips" id="chips" aria-live="polite"></div>
+      <div class="view" id="view" tabindex="-1"></div>
+      <footer class="page-foot">
+        WebAppMant procesa los datos en tu navegador: ningún archivo sale de tu equipo.
+        Metas y ponderaciones editables en <a href="#metodologia">Metodología y metas</a>.
+      </footer>
+    </main>
+  </div>
+
+  <input type="file" id="fileInput" accept=".csv,.txt,.tsv,.xlsx,.xls" hidden>
+  <div class="drop-overlay" id="dropOverlay" hidden><div>Suelta el archivo CSV o Excel para cargarlo</div></div>
+
+  <dialog class="dlg dlg-wide" id="dlgMap" aria-labelledby="dlgMapTitle">
+    <form method="dialog" class="dlg-body" id="formMap">
+      <header class="dlg-head">
+        <h2 id="dlgMapTitle">Revisar columnas del dataset</h2>
+        <p class="dlg-sub" id="dlgMapSub"></p>
+      </header>
+      <label class="field">
+        <span>Nombre del dataset</span>
+        <input type="text" id="mapName" required maxlength="60">
+      </label>
+      <div class="map-table-wrap"><table class="tbl map-table" id="mapTable"></table></div>
+      <p class="dlg-note" id="mapNote"></p>
+      <footer class="dlg-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Cancelar</button>
+        <button class="btn btn-primary" id="btnMapOk" value="ok" type="submit">Procesar dataset</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dlg" id="dlgPdf" aria-labelledby="dlgPdfTitle">
+    <form method="dialog" class="dlg-body" id="formPdf">
+      <header class="dlg-head">
+        <h2 id="dlgPdfTitle">Exportar informe PDF</h2>
+        <p class="dlg-sub">El informe usa el dataset activo con los filtros aplicados.</p>
+      </header>
+      <div class="field-grid">
+        <label class="field field-span"><span>Título del informe</span><input type="text" id="pdfTitle" maxlength="90"></label>
+        <label class="field"><span>Autor</span><input type="text" id="pdfAuthor" maxlength="70" placeholder="Nombre y apellido"></label>
+        <label class="field"><span>Programa o cargo</span><input type="text" id="pdfProgram" maxlength="80" placeholder="Programa de doctorado"></label>
+        <label class="field"><span>Institución</span><input type="text" id="pdfInst" maxlength="80"></label>
+        <label class="field"><span>Planta u organización</span><input type="text" id="pdfOrg" maxlength="80"></label>
+      </div>
+      <fieldset class="checks">
+        <legend>Contenido</legend>
+        <label><input type="checkbox" id="pdfCompare" checked> Comparación entre datasets cargados</label>
+        <label><input type="checkbox" id="pdfAnnex" checked> Anexos de definiciones, fórmulas y referencias</label>
+        <label><input type="checkbox" id="pdfTables" checked> Tablas de detalle (malos actores, Weibull)</label>
+      </fieldset>
+      <footer class="dlg-foot">
+        <button class="btn btn-ghost" value="cancel" type="submit" formnovalidate>Cancelar</button>
+        <button class="btn btn-primary" value="ok" type="submit">Generar PDF</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="busy" id="busy" hidden><div class="busy-box"><span class="spinner" aria-hidden="true"></span><span id="busyText">Procesando…</span></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script type="module" src="js/app.js?v=1.0.6"></script>
+</body>
+</html>

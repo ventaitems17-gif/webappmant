@@ -1,0 +1,10 @@
+{
+  "version": "2026-10-16",
+  "descripcion": "Datasets CMMS incluidos con la aplicación (exportación tipo SAP PM, refinería, ene-2025 a jun-2026).",
+  "datasets": [
+    { "id": "grupo-a", "nombre": "CMMS Grupo A", "archivo": "CMMS_grupo_A.csv", "nota": "Escenario base" },
+    { "id": "grupo-b", "nombre": "CMMS Grupo B", "archivo": "CMMS_grupo_B.csv", "nota": "Escenario B" },
+    { "id": "grupo-c", "nombre": "CMMS Grupo C", "archivo": "CMMS_grupo_C.csv", "nota": "Escenario C" },
+    { "id": "grupo-d", "nombre": "CMMS Grupo D", "archivo": "CMMS_grupo_D.csv", "nota": "Escenario D" }
+  ]
+}
