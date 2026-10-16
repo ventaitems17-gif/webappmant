@@ -1,8 +1,8 @@
 // WebAppMant: interfaz, estado y orquestación.
-import * as U from './util.js?v=1.0.6';
-import { FIELDS, parseCSV, readFile, headerRow, autoMap, missingRequired, processDataset, recordsToCSV, templateCSV } from './etl.js?v=1.0.6';
-import { analyze, narrative, DEFAULT_SETTINGS, KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, STATUS, targetText, critText, fmtKpi, weibullStrategy, weibullStrategyShort, RULE_SUMMARY, TIPOS } from './kpi.js?v=1.0.6';
-import * as C from './charts.js?v=1.0.6';
+import * as U from './util.js?v=1.0.8';
+import { FIELDS, parseCSV, readFile, headerRow, autoMap, missingRequired, processDataset, recordsToCSV, templateCSV } from './etl.js?v=1.0.8';
+import { analyze, narrative, DEFAULT_SETTINGS, KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, STATUS, targetText, critText, fmtKpi, weibullStrategy, weibullStrategyShort, RULE_SUMMARY, TIPOS } from './kpi.js?v=1.0.8';
+import * as C from './charts.js?v=1.0.8';
 
 const { num, pct, clp, hours, esc, fmtDate } = U;
 
@@ -24,6 +24,7 @@ const FILTER_DIMS = [
 const EXTRA_DIMS = { modo: 'Modo de falla', equipo: 'Equipo', area: 'Área', causa: 'Causa' };
 const FLAG_NAMES = { 1: 'Fin < inicio', 2: 'Inicio < creación', 4: 'Plan < creación', 8: 'Cerrada sin fin', 16: 'Abierta con fin', 32: 'Detención > lapso', 64: 'Costo ≠ componentes', 128: 'Estado ≠ status', 256: 'Tipo ≠ clase', 512: 'Sin modo de falla', 1024: 'Atípico extremo' };
 
+const CLEAN = new URLSearchParams(location.search).has('limpio');
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -309,7 +310,7 @@ function renderTitleblock() {
     `<button class="btn btn-primary" id="tbPdf" type="button" ${K ? '' : 'disabled'}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L15 6v11.5H5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 2.5V6h4M7.5 11h5M7.5 14h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Exportar informe PDF</button></div>`;
   if (!ds || ds.status !== 'ready') {
     $('#titleblock').innerHTML = `<div class="tb-cell"><div class="tb-title">${menu}<div><span class="tb-label">Dataset</span><div class="tb-value">Sin dataset activo</div></div></div></div>` +
-      ['Período', 'Órdenes', 'Equipos', 'Calidad de datos', 'Emitido'].map((l, i) => `<div class="tb-cell ${i > 2 ? 'opt' : ''}"><span class="tb-label">${l}</span><div class="tb-value">—</div></div>`).join('') + actions;
+      ['Período', 'Órdenes', 'Equipos', 'Calidad de datos', 'Emitido'].map((l, i) => `<div class="tb-cell ${i > 2 ? 'opt' : ''} ${i === 4 ? 'tb-issued' : ''}"><span class="tb-label">${l}</span><div class="tb-value">—</div></div>`).join('') + actions;
     return;
   }
   const p = period(ds);
@@ -446,7 +447,9 @@ function emptyState() {
   const fileMsg = state.manifestError === 'file'
     ? `<p>Abriste el archivo directamente desde el disco, y el navegador bloquea la lectura de los datasets incluidos. Ábrela desde GitHub Pages o con doble clic en <b>ABRIR-APP.bat</b>. También puedes cargar tu propio archivo ahora.</p>`
     : `<p>Carga un archivo CSV o Excel exportado de tu CMMS (SAP PM, Maximo u otro). La aplicación reconoce las columnas, depura los datos y calcula los indicadores en tu navegador.</p>`;
-  return `<div class="empty"><h2>Carga un dataset de mantenimiento</h2>${fileMsg}<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn btn-primary" type="button" id="emptyUpload">Cargar dataset</button><a class="btn" href="plantilla/plantilla_dataset_CMMS.csv" download>Descargar plantilla CSV</a></div><p style="font-size:12.5px;color:var(--muted)">También puedes arrastrar el archivo a esta ventana.</p></div>`;
+  const saved = state.datasets.filter((d) => d.source === 'upload').length;
+  const cleanMsg = CLEAN ? `<p style="font-size:12.5px;color:var(--muted)">${saved ? `Tienes ${saved} ${U.plural(saved, 'dataset guardado', 'datasets guardados')} en este navegador; elígelo en la lista de la izquierda o carga uno nuevo. ` : ''}¿Prefieres partir con datos de ejemplo? <a href="./${location.hash}">Abrir con los datasets incluidos</a>.</p>` : '';
+  return `<div class="empty"><h2>${CLEAN ? 'Página en limpio: carga tu dataset' : 'Carga un dataset de mantenimiento'}</h2>${fileMsg}<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="btn btn-primary" type="button" id="emptyUpload">Cargar dataset</button><a class="btn" href="plantilla/plantilla_dataset_CMMS.csv" download>Descargar plantilla CSV</a></div><p style="font-size:12.5px;color:var(--muted)">También puedes arrastrar el archivo a esta ventana.</p>${cleanMsg}</div>`;
 }
 
 // 1) Resumen ejecutivo
@@ -903,7 +906,7 @@ function openPdfDialog() {
       const list = opts.compare ? await compareList() : [];
       $('#busyText').textContent = 'Dibujando gráficos y tablas…';
       await nextFrame();
-      const { generateReport } = await import('./report.js?v=1.0.6');
+      const { generateReport } = await import('./report.js?v=1.0.8');
       const name = await generateReport({ K: state.K, N: state.N, ds, meta, opts, compare: list, filters: filtersText(), recsN: state.recs.length, references: REFERENCES });
       busy(false);
       toast('Informe descargado: ' + name);
@@ -924,11 +927,13 @@ async function init() {
   renderNav(); renderTitleblock();
   if (!window.echarts || !window.Papa) { renderView(); return; }
   $('#view').innerHTML = '<div class="empty"><span class="spinner"></span><h2>Preparando la aplicación</h2></div>';
-  await loadManifest();
+  // Modo limpio (?limpio): sin datasets de ejemplo ni dataset activo al abrir.
+  if (CLEAN) { const lm = $('#lnkMode'); lm.href = './'; lm.textContent = 'Ver con los datasets de ejemplo'; }
+  if (!CLEAN) await loadManifest();
   await restoreUploads();
   renderDsList();
   const first = state.datasets[0];
-  if (first) await activate(first.id); else renderView();
+  if (first && !CLEAN) await activate(first.id); else { renderTitleblock(); renderView(); }
 }
 // Plantilla generada en el cliente como respaldo del archivo estático.
 document.addEventListener('click', (e) => {

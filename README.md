@@ -35,6 +35,15 @@ Al actualizar los archivos JS o CSS, cambia el número de versión `?v=` en `ind
 
 Haz doble clic en `ABRIR-APP.bat`. Enciende un servidor local en `http://localhost:5610` y abre el navegador; necesita Python instalado. Si abres `index.html` directamente, el navegador bloquea la lectura de los datasets incluidos, aunque igual puedes cargar un archivo propio.
 
+## Abrir la página en limpio
+
+Agrega `?limpio` al final de la dirección para abrir la app sin los datasets de ejemplo y sin ningún dataset activo, lista para cargar tu archivo:
+
+- En línea: `https://ventaitems17-gif.github.io/webappmant/?limpio`
+- En local: `http://localhost:5610/?limpio`
+
+Los datasets que cargues en ese modo quedan guardados en el navegador y aparecen en la lista de la izquierda la próxima vez. Puedes quitarlos con la ✕. Para volver a los datos de ejemplo, usa el enlace «Ver con los datasets de ejemplo» del menú o abre la dirección sin `?limpio`.
+
 ## Cargar un dataset nuevo
 
 Usa el botón **Cargar dataset** o arrastra el archivo a la ventana. Se aceptan CSV con separador `,`, `;`, tabulación o `|`, además de Excel `.xlsx`. La app reconoce las columnas por su nombre (con o sin tildes, en español o inglés) y muestra una pantalla para confirmar o corregir la asignación.

@@ -1,9 +1,9 @@
 // Informe PDF (jsPDF + AutoTable). Estructura académica: portada con cajetín,
 // índice, guía de lectura, secciones numeradas con figuras y tablas
 // numeradas, conclusiones, recomendaciones y anexos metodológicos.
-import * as U from './util.js?v=1.0.6';
-import * as C from './charts.js?v=1.0.6';
-import { KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, targetText, critText, fmtKpi, weibullStrategy, RULE_SUMMARY } from './kpi.js?v=1.0.6';
+import * as U from './util.js?v=1.0.8';
+import * as C from './charts.js?v=1.0.8';
+import { KPI_DEFS, KPI_ORDER, DIMENSIONS, LEVELS, targetText, critText, fmtKpi, weibullStrategy, RULE_SUMMARY } from './kpi.js?v=1.0.8';
 
 const { num, pct, clp, hours, fmtDate, monthLabel } = U;
 
